@@ -7,6 +7,8 @@
 import UIKit
 
 class MainViewController: UIViewController {
+    var bank: Bank = Bank()
+    
     let mainStackView: UIStackView = {
         let stackView: UIStackView = UIStackView()
         stackView.alignment = .fill
@@ -87,6 +89,7 @@ class MainViewController: UIViewController {
         stackView.axis = .vertical
         stackView.distribution = .equalSpacing
         stackView.alignment = .fill
+        stackView.spacing = 9
         stackView.translatesAutoresizingMaskIntoConstraints = false
         return stackView
     }()
@@ -96,6 +99,7 @@ class MainViewController: UIViewController {
         stackView.axis = .vertical
         stackView.distribution = .equalSpacing
         stackView.alignment = .fill
+        stackView.spacing = 9
         stackView.translatesAutoresizingMaskIntoConstraints = false
         return stackView
     }()
@@ -166,29 +170,39 @@ class MainViewController: UIViewController {
         waitingStackView.leadingAnchor.constraint(equalTo: waitingScrollView.contentLayoutGuide.leadingAnchor).isActive = true
         waitingStackView.trailingAnchor.constraint(equalTo: waitingScrollView.contentLayoutGuide.trailingAnchor).isActive = true
         waitingStackView.bottomAnchor.constraint(equalTo: waitingScrollView.contentLayoutGuide.bottomAnchor).isActive = true
-        waitingStackView.widthAnchor.constraint(equalTo: waitingScrollView.contentLayoutGuide.widthAnchor).isActive = true
-        waitingStackView.centerXAnchor.constraint(equalTo: waitingScrollView.centerXAnchor).isActive = true
+        waitingStackView.widthAnchor.constraint(equalTo: waitingScrollView.frameLayoutGuide.widthAnchor).isActive = true
         
         workingStackView.topAnchor.constraint(equalTo: workingScrollView.contentLayoutGuide.topAnchor).isActive = true
         workingStackView.leadingAnchor.constraint(equalTo: workingScrollView.contentLayoutGuide.leadingAnchor).isActive = true
         workingStackView.trailingAnchor.constraint(equalTo: workingScrollView.contentLayoutGuide.trailingAnchor).isActive = true
         workingStackView.bottomAnchor.constraint(equalTo: workingScrollView.contentLayoutGuide.bottomAnchor).isActive = true
-        workingStackView.widthAnchor.constraint(equalTo: workingScrollView.contentLayoutGuide.widthAnchor).isActive = true
-        workingStackView.centerXAnchor.constraint(equalTo: workingScrollView.centerXAnchor).isActive = true
+        workingStackView.widthAnchor.constraint(equalTo: workingScrollView.frameLayoutGuide.widthAnchor).isActive = true
+    }
+    
+    @objc func tapAddClientButton() {
+        bank.updateClients()
+        
+        let label: UILabel = UILabel()
+        label.text = "\(number) - 예금"
+        label.font = UIFont.preferredFont(forTextStyle: .title1)
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        waitingStackView.addArrangedSubview(label)
+    }
+    
+    @objc func tapResetButton() {
+        bank.resetWorkData()
     }
     
     @objc func addClients() {
         for number in 0..<10 {
-            let label: UILabel = UILabel()
-            label.text = "\(number) - 예금"
-            label.textAlignment = .center
-            label.translatesAutoresizingMaskIntoConstraints = false
-            waitingStackView.addArrangedSubview(label)
+            
         }
         
         for number in 0..<10 {
             let label: UILabel = UILabel()
             label.text = "\(number) - 예금"
+            label.font = UIFont.preferredFont(forTextStyle: .title1)
             label.textAlignment = .center
             label.translatesAutoresizingMaskIntoConstraints = false
             workingStackView.addArrangedSubview(label)

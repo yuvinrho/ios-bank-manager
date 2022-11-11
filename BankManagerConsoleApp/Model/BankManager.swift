@@ -106,15 +106,6 @@ struct BankManager {
         }
     }
     
-    func close() {
-        let message: String =
-        String(format: "업무가 마감되었습니다. 오늘 업무를 처리한 고객은 총 %d명이며, 총 업무시간은 %.2f초 입니다.",
-               totalClientCount,
-               totalWorkTime)
-        
-        print("\(message)")
-    }
-    
     mutating func resetWorkData() {
         totalClientCount = 0
         totalWorkTime = 0

@@ -6,13 +6,7 @@
 //
 
 enum ClientNumber {
-    static let min = 10
-    static let max = 30
-}
-
-enum MenuOption: String {
-    case open = "1"
-    case exit = "2"
+    static let max = 10
 }
 
 enum DepositWorkerNumber {
