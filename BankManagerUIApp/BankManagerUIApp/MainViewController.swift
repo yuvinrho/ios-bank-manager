@@ -29,6 +29,9 @@ class MainViewController: UIViewController {
         button.setTitle("고객 10명 추가", for: .normal)
         button.setTitleColor(.systemBlue, for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self,
+                         action: #selector(addClients),
+                         for: .touchUpInside)
         return button
     }()
     
@@ -78,11 +81,12 @@ class MainViewController: UIViewController {
         label.backgroundColor = .systemIndigo
         return label
     }()
-
+    
     let waitingStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .vertical
         stackView.distribution = .equalSpacing
+        stackView.alignment = .fill
         stackView.translatesAutoresizingMaskIntoConstraints = false
         return stackView
     }()
@@ -91,6 +95,7 @@ class MainViewController: UIViewController {
         let stackView = UIStackView()
         stackView.axis = .vertical
         stackView.distribution = .equalSpacing
+        stackView.alignment = .fill
         stackView.translatesAutoresizingMaskIntoConstraints = false
         return stackView
     }()
@@ -98,30 +103,30 @@ class MainViewController: UIViewController {
     let waitingScrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.showsHorizontalScrollIndicator = false
         return scrollView
     }()
     
     let workingScrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.showsHorizontalScrollIndicator = false
         return scrollView
     }()
     
     let statusStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .horizontal
-        stackView.alignment = .center
-        stackView.distribution = .fill
+        stackView.alignment = .fill
+        stackView.distribution = .fillEqually
         stackView.translatesAutoresizingMaskIntoConstraints = false
         return stackView
     }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
         
         self.setup()
-        
     }
     
     func setup() {
@@ -150,13 +155,44 @@ class MainViewController: UIViewController {
         
         self.view.addSubview(mainStackView)
     }
-
+    
     func setAutoLayout() {
         mainStackView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor).isActive = true
         mainStackView.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor).isActive = true
         mainStackView.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor).isActive = true
         mainStackView.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor).isActive = true
         
+        waitingStackView.topAnchor.constraint(equalTo: waitingScrollView.contentLayoutGuide.topAnchor).isActive = true
+        waitingStackView.leadingAnchor.constraint(equalTo: waitingScrollView.contentLayoutGuide.leadingAnchor).isActive = true
+        waitingStackView.trailingAnchor.constraint(equalTo: waitingScrollView.contentLayoutGuide.trailingAnchor).isActive = true
+        waitingStackView.bottomAnchor.constraint(equalTo: waitingScrollView.contentLayoutGuide.bottomAnchor).isActive = true
+        waitingStackView.widthAnchor.constraint(equalTo: waitingScrollView.contentLayoutGuide.widthAnchor).isActive = true
+        waitingStackView.centerXAnchor.constraint(equalTo: waitingScrollView.centerXAnchor).isActive = true
+        
+        workingStackView.topAnchor.constraint(equalTo: workingScrollView.contentLayoutGuide.topAnchor).isActive = true
+        workingStackView.leadingAnchor.constraint(equalTo: workingScrollView.contentLayoutGuide.leadingAnchor).isActive = true
+        workingStackView.trailingAnchor.constraint(equalTo: workingScrollView.contentLayoutGuide.trailingAnchor).isActive = true
+        workingStackView.bottomAnchor.constraint(equalTo: workingScrollView.contentLayoutGuide.bottomAnchor).isActive = true
+        workingStackView.widthAnchor.constraint(equalTo: workingScrollView.contentLayoutGuide.widthAnchor).isActive = true
+        workingStackView.centerXAnchor.constraint(equalTo: workingScrollView.centerXAnchor).isActive = true
+    }
+    
+    @objc func addClients() {
+        for number in 0..<10 {
+            let label: UILabel = UILabel()
+            label.text = "\(number) - 예금"
+            label.textAlignment = .center
+            label.translatesAutoresizingMaskIntoConstraints = false
+            waitingStackView.addArrangedSubview(label)
+        }
+        
+        for number in 0..<10 {
+            let label: UILabel = UILabel()
+            label.text = "\(number) - 예금"
+            label.textAlignment = .center
+            label.translatesAutoresizingMaskIntoConstraints = false
+            workingStackView.addArrangedSubview(label)
+        }
     }
 }
 
