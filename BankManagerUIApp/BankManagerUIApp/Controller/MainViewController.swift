@@ -8,6 +8,7 @@ import UIKit
 
 class MainViewController: UIViewController {
     var bank: Bank = Bank()
+    let group: DispatchGroup = DispatchGroup()
     
     let mainStackView: UIStackView = {
         let stackView: UIStackView = UIStackView()
@@ -32,7 +33,7 @@ class MainViewController: UIViewController {
         button.setTitleColor(.systemBlue, for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self,
-                         action: #selector(addClients),
+                         action: #selector(tapAddClientButton),
                          for: .touchUpInside)
         return button
     }()
@@ -42,6 +43,9 @@ class MainViewController: UIViewController {
         button.setTitle("초기화", for: .normal)
         button.setTitleColor(.systemRed, for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self,
+                         action: #selector(tapResetButton),
+                         for: .touchUpInside)
         return button
     }()
     
@@ -180,32 +184,109 @@ class MainViewController: UIViewController {
     }
     
     @objc func tapAddClientButton() {
-        bank.updateClients()
-        
-        let label: UILabel = UILabel()
-        label.text = "\(number) - 예금"
-        label.font = UIFont.preferredFont(forTextStyle: .title1)
-        label.textAlignment = .center
-        label.translatesAutoresizingMaskIntoConstraints = false
-        waitingStackView.addArrangedSubview(label)
-    }
-    
-    @objc func tapResetButton() {
-        bank.resetWorkData()
-    }
-    
-    @objc func addClients() {
-        for number in 0..<10 {
+        for _ in 0..<ClientNumber.max {
+            let ticketNumber = bank.publishTicketNumber()
+            let requestingWork = BankWork.allCases.randomElement() ?? .deposit
+            let client = Client(ticketNumber: ticketNumber, requestingWork: requestingWork)
+            bank.addClient(client)
             
-        }
-        
-        for number in 0..<10 {
             let label: UILabel = UILabel()
-            label.text = "\(number) - 예금"
+            label.text = "\(client.ticketNumber) - \(client.requestingWork.name)"
             label.font = UIFont.preferredFont(forTextStyle: .title1)
             label.textAlignment = .center
             label.translatesAutoresizingMaskIntoConstraints = false
-            workingStackView.addArrangedSubview(label)
+            label.tag = ticketNumber
+            
+            if requestingWork == .loan {
+                label.textColor = .systemPurple
+            }
+            
+            waitingStackView.addArrangedSubview(label)
+        }
+        
+        work()
+    }
+    
+    @objc func tapResetButton() {
+        waitingStackView.subviews.forEach {
+            $0.removeFromSuperview()
+        }
+        
+        workingStackView.subviews.forEach {
+            $0.removeFromSuperview()
+        }
+        
+        bank.resetWorkData()
+    }
+    
+    func doDepositWork(by bankWorker: BankWorker) {
+        var ticketNumber: Int?
+        
+        DispatchQueue.global().async(group: group) {
+            while !self.bank.bankManager.depositClientQueue.isEmpty {
+                guard let client = self.bank.bankManager.depositClientQueue.dequeue() else { return }
+                ticketNumber = client.ticketNumber
+                DispatchQueue.main.async {
+                    self.waitingStackView.subviews.forEach {
+                        if $0.tag == ticketNumber {
+                            $0.removeFromSuperview()
+                            self.workingStackView.addArrangedSubview($0)
+                        }
+                    }
+                }
+                
+                bankWorker.startWork(for: client)
+            }
+        }
+        
+        group.notify(queue: .main) {
+            self.workingStackView.subviews.forEach {
+                if $0.tag == ticketNumber {
+                    $0.removeFromSuperview()
+                }
+            }
+        }
+    }
+    
+    func doLoanWork(by bankWorker: BankWorker) {
+        var ticketNumber: Int?
+        
+        DispatchQueue.global().async(group: group) {
+            while !self.bank.bankManager.loanClientQueue.isEmpty {
+                guard let client = self.bank.bankManager.loanClientQueue.dequeue() else { return }
+                ticketNumber = client.ticketNumber
+                DispatchQueue.main.async {
+                    self.waitingStackView.subviews.forEach {
+                        if $0.tag == ticketNumber {
+                            $0.removeFromSuperview()
+                            self.workingStackView.addArrangedSubview($0)
+                        }
+                    }
+                }
+                
+                bankWorker.startWork(for: client)
+            }
+        }
+        
+        group.notify(queue: .main) {
+            self.workingStackView.subviews.forEach {
+                if $0.tag == ticketNumber {
+                    $0.removeFromSuperview()
+                }
+            }
+        }
+    }
+    
+    @objc func work() {
+        for worker in bank.bankManager.bankWorkers {
+            switch worker.bankWork {
+            case .deposit:
+                doDepositWork(by: worker)
+            case .loan:
+                doLoanWork(by: worker)
+            default:
+                return
+            }
         }
     }
 }

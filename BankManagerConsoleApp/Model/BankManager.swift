@@ -8,14 +8,14 @@
 import Foundation
 
 struct BankManager {
-    private var bankWorkers: [BankWorker] = []
-    private let depositClientQueue: Queue<Client> = Queue()
-    private let loanClientQueue: Queue<Client> = Queue()
-    private var totalClientCount: Int = 0
-    private var totalWorkTime: TimeInterval = 0.0
-    private let group: DispatchGroup = DispatchGroup()
-    private let depositSemaphore = DispatchSemaphore(value: 1)
-    private let loanSemaphore = DispatchSemaphore(value: 1)
+    var bankWorkers: [BankWorker] = []
+    let depositClientQueue: Queue<Client> = Queue()
+    let loanClientQueue: Queue<Client> = Queue()
+    var totalClientCount: Int = 0
+    var totalWorkTime: TimeInterval = 0.0
+    let group: DispatchGroup = DispatchGroup()
+    let depositSemaphore = DispatchSemaphore(value: 1)
+    let loanSemaphore = DispatchSemaphore(value: 1)
     
     init() {
         var currentDepositWorkerCount: Int = 0
@@ -59,7 +59,7 @@ struct BankManager {
         assignBankWork()
     }
     
-    private func assignBankWork() {
+    func assignBankWork() {
         for worker in bankWorkers {
             switch worker.bankWork {
             case .deposit:

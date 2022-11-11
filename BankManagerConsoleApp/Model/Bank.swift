@@ -8,21 +8,7 @@
 import Foundation
 
 struct Bank {
-    private var bankManager: BankManager = BankManager()
-    
-    mutating func updateClients() {
-        var clients: [Client] = []
-        
-        for _ in 1...ClientNumber.max {
-            let work = [BankWork.loan, BankWork.deposit].randomElement() ?? .deposit
-            let client = Client(ticketNumber: self.publishTicketNumber(), requestingWork: work)
-            clients.append(client)
-        }
-        
-        clients.forEach {
-            self.addClient($0)
-        }
-    }
+    var bankManager: BankManager = BankManager()
     
     mutating func addClient(_ client: Client) {
         bankManager.addClientQueue(client)
