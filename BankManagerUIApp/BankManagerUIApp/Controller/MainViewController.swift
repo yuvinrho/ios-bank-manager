@@ -6,11 +6,11 @@
 
 import UIKit
 
-class MainViewController: UIViewController {
-    var bank: Bank = Bank()
-    let group: DispatchGroup = DispatchGroup()
+final class MainViewController: UIViewController {
+    private var bank: Bank = Bank()
+    private let group: DispatchGroup = DispatchGroup()
     
-    let mainStackView: UIStackView = {
+    private let mainStackView: UIStackView = {
         let stackView: UIStackView = UIStackView()
         stackView.alignment = .fill
         stackView.axis = .vertical
@@ -19,7 +19,7 @@ class MainViewController: UIViewController {
         return stackView
     }()
     
-    let buttonStackView: UIStackView = {
+    private let buttonStackView: UIStackView = {
         let stackView: UIStackView = UIStackView()
         stackView.axis = .horizontal
         stackView.distribution = .fillEqually
@@ -27,7 +27,7 @@ class MainViewController: UIViewController {
         return stackView
     }()
     
-    let addClientButton: UIButton = {
+    private let addClientButton: UIButton = {
         let button = UIButton()
         button.setTitle("고객 10명 추가", for: .normal)
         button.setTitleColor(.systemBlue, for: .normal)
@@ -38,7 +38,7 @@ class MainViewController: UIViewController {
         return button
     }()
     
-    let resetButton: UIButton = {
+    private let resetButton: UIButton = {
         let button = UIButton()
         button.setTitle("초기화", for: .normal)
         button.setTitleColor(.systemRed, for: .normal)
@@ -49,7 +49,7 @@ class MainViewController: UIViewController {
         return button
     }()
     
-    let timerLabel: UILabel = {
+    private let timerLabel: UILabel = {
         let label = UILabel()
         label.text = "업무시간 - "
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -58,7 +58,7 @@ class MainViewController: UIViewController {
         return label
     }()
     
-    let labelStackView: UIStackView = {
+    private let labelStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .horizontal
         stackView.distribution = .fillEqually
@@ -66,7 +66,7 @@ class MainViewController: UIViewController {
         return stackView
     }()
     
-    let waitingTitleLabel: UILabel = {
+    private let waitingTitleLabel: UILabel = {
         let label = UILabel()
         label.text = "대기중"
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -77,7 +77,7 @@ class MainViewController: UIViewController {
         return label
     }()
     
-    let workingTitleLabel: UILabel = {
+    private let workingTitleLabel: UILabel = {
         let label = UILabel()
         label.text = "업무중"
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -88,7 +88,7 @@ class MainViewController: UIViewController {
         return label
     }()
     
-    let waitingStackView: UIStackView = {
+    private let waitingStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .vertical
         stackView.distribution = .equalSpacing
@@ -98,7 +98,7 @@ class MainViewController: UIViewController {
         return stackView
     }()
     
-    let workingStackView: UIStackView = {
+    private let workingStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .vertical
         stackView.distribution = .equalSpacing
@@ -108,21 +108,21 @@ class MainViewController: UIViewController {
         return stackView
     }()
     
-    let waitingScrollView: UIScrollView = {
+    private let waitingScrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.showsHorizontalScrollIndicator = false
         return scrollView
     }()
     
-    let workingScrollView: UIScrollView = {
+    private let workingScrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.showsHorizontalScrollIndicator = false
         return scrollView
     }()
     
-    let statusStackView: UIStackView = {
+    private let statusStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .horizontal
         stackView.alignment = .fill
@@ -137,13 +137,13 @@ class MainViewController: UIViewController {
         self.setup()
     }
     
-    func setup() {
+    private func setup() {
         view.backgroundColor = .white
         addViews()
         setAutoLayout()
     }
     
-    func addViews() {
+    private func addViews() {
         buttonStackView.addArrangedSubview(addClientButton)
         buttonStackView.addArrangedSubview(resetButton)
         
@@ -164,7 +164,7 @@ class MainViewController: UIViewController {
         self.view.addSubview(mainStackView)
     }
     
-    func setAutoLayout() {
+    private func setAutoLayout() {
         mainStackView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor).isActive = true
         mainStackView.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor).isActive = true
         mainStackView.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor).isActive = true
@@ -183,7 +183,7 @@ class MainViewController: UIViewController {
         workingStackView.widthAnchor.constraint(equalTo: workingScrollView.frameLayoutGuide.widthAnchor).isActive = true
     }
     
-    @objc func tapAddClientButton() {
+    @objc private func tapAddClientButton() {
         for _ in 0..<ClientNumber.max {
             let ticketNumber = bank.publishTicketNumber()
             let requestingWork = BankWork.allCases.randomElement() ?? .deposit
@@ -207,7 +207,7 @@ class MainViewController: UIViewController {
         work()
     }
     
-    @objc func tapResetButton() {
+    @objc private  func tapResetButton() {
         waitingStackView.subviews.forEach {
             $0.removeFromSuperview()
         }
@@ -219,65 +219,68 @@ class MainViewController: UIViewController {
         bank.resetWorkData()
     }
     
-    func doDepositWork(by bankWorker: BankWorker) {
-        var ticketNumber: Int?
-        
-        DispatchQueue.global().async(group: group) {
+    private func doDepositWork(by bankWorker: BankWorker) {
+        DispatchQueue.global(qos: .userInteractive).async(group: group) {
             while !self.bank.bankManager.depositClientQueue.isEmpty {
                 guard let client = self.bank.bankManager.depositClientQueue.dequeue() else { return }
-                ticketNumber = client.ticketNumber
-                DispatchQueue.main.async {
-                    self.waitingStackView.subviews.forEach {
-                        if $0.tag == ticketNumber {
-                            $0.removeFromSuperview()
-                            self.workingStackView.addArrangedSubview($0)
-                        }
+                bankWorker.startWork(for: client)
+                
+                DispatchQueue.main.async { [weak self] in
+                    guard let clientLabel = self?.view.viewWithTag(client.ticketNumber) as? UILabel else { return }
+                    self?.addView(clientLabel, from: self?.workingStackView)
+                    print("\(clientLabel.text ?? "") 업무시작")
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + client.requestingWork.time) {
+                        self?.removeView(clientLabel)
+                        print("\(clientLabel.text ?? "") 업무종료")
                     }
                 }
                 
-                bankWorker.startWork(for: client)
-            }
-        }
         
-        group.notify(queue: .main) {
-            self.workingStackView.subviews.forEach {
-                if $0.tag == ticketNumber {
-                    $0.removeFromSuperview()
-                }
             }
         }
     }
     
-    func doLoanWork(by bankWorker: BankWorker) {
-        var ticketNumber: Int?
-        
-        DispatchQueue.global().async(group: group) {
+    
+    private func doLoanWork(by bankWorker: BankWorker) {
+        DispatchQueue.global(qos: .userInteractive).async(group: group) {
             while !self.bank.bankManager.loanClientQueue.isEmpty {
                 guard let client = self.bank.bankManager.loanClientQueue.dequeue() else { return }
-                ticketNumber = client.ticketNumber
-                DispatchQueue.main.async {
-                    self.waitingStackView.subviews.forEach {
-                        if $0.tag == ticketNumber {
-                            $0.removeFromSuperview()
-                            self.workingStackView.addArrangedSubview($0)
-                        }
+                bankWorker.startWork(for: client)
+                
+                DispatchQueue.main.async { [weak self] in
+                    guard let clientLabel = self?.view.viewWithTag(client.ticketNumber) as? UILabel else { return }
+                    self?.addView(clientLabel, from: self?.workingStackView)
+                    print("\(clientLabel.text ?? "") 업무시작")
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + client.requestingWork.time) {
+                        self?.removeView(clientLabel)
+                        print("\(clientLabel.text ?? "") 업무종료")
                     }
                 }
                 
-                bankWorker.startWork(for: client)
-            }
-        }
-        
-        group.notify(queue: .main) {
-            self.workingStackView.subviews.forEach {
-                if $0.tag == ticketNumber {
-                    $0.removeFromSuperview()
-                }
             }
         }
     }
     
-    @objc func work() {
+    private func addView(_ view: UIView!, from stackView: UIStackView!) {
+        view.isHidden = true
+        stackView.addArrangedSubview(view)
+        
+        UIView.animate(withDuration: 0.3) {
+            view.isHidden = false
+        }
+    }
+    
+    private func removeView(_ view: UIView) {
+        UIView.animate(withDuration: 0.3) {
+            view.isHidden = true
+        } completion: { _ in
+            view.removeFromSuperview()
+        }
+    }
+    
+    private func work() {
         for worker in bank.bankManager.bankWorkers {
             switch worker.bankWork {
             case .deposit:
